@@ -4,5 +4,6 @@ llama-index
 llama_index-llms-gemini
 llama-index-embeddings-gemini
 llama-index-vector-stores-pinecone
+llama-index-core
 BeautifulSoup4
 google-generativeai

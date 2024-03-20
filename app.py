@@ -11,6 +11,7 @@ from llama_index.core import Settings
 #setting API keys
 GOOGLE_API_KEY = st.secrets.GOOGLE_API_KEY
 PINECONE_API_KEY = st.secrets.PINECONE_API_KEY
+
 os.environ["GOOGLE_API_KEY"] = GOOGLE_API_KEY
 os.environ["PINECONE_API_KEY"] = PINECONE_API_KEY
 
@@ -35,7 +36,7 @@ embed_model = GeminiEmbedding(model_name="models/embedding-001")
 
 Settings.llm = llm
 Settings.embed_model = embed_model
-Settings.chunk_size = 512
+Settings.chunk_size = 768
 
 # Create a PineconeVectorStore using the specified pinecone_index
 vector_store = PineconeVectorStore(pinecone_index=pinecone_index)
@@ -54,8 +55,34 @@ index = VectorStoreIndex.from_documents(
 #query Pinecone vector store
 query_engine = index.as_query_engine()
 
-# Query the index, send the context to Gemini, and wait for the response
-gemini_response = query_engine.query("What does the author think about LlamaIndex?")
 
-#print the response
-print(gemini_response)
+#UI
+if "history" not in st.session_state:
+    st.session_state.history = []
+for msg in st.session_state.history:
+    with st.chat_message(msg['role']):
+        st.markdown(msg['content'])
+
+
+prompt = st.chat_input("Say something")
+if prompt:
+    st.session_state.history.append({
+        'role':'user',
+        'content':prompt
+    })
+
+    with st.chat_message("user"):
+        st.markdown(prompt)
+    
+    # Query the index, send the context to Gemini, and wait for the response
+    with st.spinner('💡Thinking'):
+        response = query_engine.query({"query": prompt})
+
+        st.session_state.history.append({
+            'role' : 'Assistant',
+            'content' : response['result']
+        })
+
+        #print the response
+        with st.chat_message("Assistant"):
+            st.markdown(response['result'])
