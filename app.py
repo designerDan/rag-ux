@@ -1,7 +1,6 @@
 import os
 import streamlit as st
-import pinecone
-
+from pinecone import Pinecone
 from llama_index.llms.gemini import Gemini
 from llama_index.vector_stores.pinecone import PineconeVectorStore
 from llama_index.embeddings.gemini import GeminiEmbedding
@@ -9,9 +8,11 @@ from llama_index.core import StorageContext, VectorStoreIndex, download_loader
 
 from llama_index.core import Settings
 
-
-os.environ["GOOGLE_API_KEY"] = st.secrets.GOOGLE_API_KEY
-os.environ["PINECONE_API_KEY"] = st.secrets.PINECONE_API_KEY
+#setting API keys
+GOOGLE_API_KEY = st.secrets.GOOGLE_API_KEY
+PINECONE_API_KEY = st.secrets.PINECONE_API_KEY
+os.environ["GOOGLE_API_KEY"] = GOOGLE_API_KEY
+os.environ["PINECONE_API_KEY"] = PINECONE_API_KEY
 
 DATA_URL = "https://portfolio.danielgmason.com"
 
