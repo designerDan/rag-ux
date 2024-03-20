@@ -1,5 +1,5 @@
 import os
-import streamlist as st
+import streamlit as st
 import pinecone
 from llama_index.llms.gemini import Gemini
 from llama_index.vector_stores.pinecone import PineconeVectorStore
