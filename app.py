@@ -55,7 +55,6 @@ index = VectorStoreIndex.from_documents(
 #query Pinecone vector store
 query_engine = index.as_query_engine()
 
-
 #UI
 if "history" not in st.session_state:
     st.session_state.history = []
@@ -76,13 +75,13 @@ if prompt:
     
     # Query the index, send the context to Gemini, and wait for the response
     with st.spinner('💡Thinking'):
-        response = query_engine.query({"query": prompt})
+        response = query_engine.query(prompt)
 
         st.session_state.history.append({
-            'role' : 'Assistant',
-            'content' : response['result']
+            'role':'Assistant',
+            'content':response
         })
 
         #print the response
         with st.chat_message("Assistant"):
-            st.markdown(response['result'])
+            st.markdown(response)
