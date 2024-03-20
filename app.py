@@ -1,12 +1,13 @@
 import os
-from streamlit_pinecone import PineconeConnection
+import streamlist as st
+import pinecone
 from llama_index.llms.gemini import Gemini
 from llama_index.vector_stores.pinecone import PineconeVectorStore
 from llama_index.embeddings.gemini import GeminiEmbedding
 from llama_index.core import StorageContext, VectorStoreIndex, download_loader
 
 from llama_index.core import Settings
-import streamlist as st
+
 
 os.environ["GOOGLE_API_KEY"] = st.secrets.GOOGLE_API_KEY
 os.environ["PINECONE_API_KEY"] = st.secrets.PINECONE_API_KEY
