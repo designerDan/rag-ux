@@ -1,3 +1,4 @@
 streamlit
 pinecone-client
 llama-index
+llama_index-llms-gemini
