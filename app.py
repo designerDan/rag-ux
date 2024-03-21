@@ -1,87 +1,108 @@
 import os
-import streamlit as st
-from pinecone import Pinecone
-from llama_index.llms.gemini import Gemini
-from llama_index.vector_stores.pinecone import PineconeVectorStore
-from llama_index.embeddings.gemini import GeminiEmbedding
-from llama_index.core import StorageContext, VectorStoreIndex, download_loader
+from dotenv import load_dotenv
 
-from llama_index.core import Settings
+from pinecone import Pinecone
+from pinecone import PodSpec
+
+from langchain_pinecone import PineconeVectorStore
+from langchain_community.llms import Ollama
+from langchain_community.embeddings import OllamaEmbeddings
+from langchain_community.document_loaders import WebBaseLoader
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain.prompts import PromptTemplate
+from langchain_core.runnables import RunnablePassthrough
+from langchain_core.output_parsers import StrOutputParser
+
+load_dotenv()
 
 #setting API keys
-GOOGLE_API_KEY = st.secrets.GOOGLE_API_KEY
-PINECONE_API_KEY = st.secrets.PINECONE_API_KEY
-
-os.environ["GOOGLE_API_KEY"] = GOOGLE_API_KEY
-os.environ["PINECONE_API_KEY"] = PINECONE_API_KEY
-
-DATA_URL = "https://portfolio.danielgmason.com"
-
-llm = Gemini()
+os.environ["GOOGLE_API_KEY"] = st.secrets.GOOGLE_API_KEY
+os.environ["PINECONE_API_KEY"] = st.secrets.PINECONE_API_KEY
 
 #creating a Pinecone client
-pinecone_client = Pinecone(api_key=os.environ["PINECONE_API_KEY"])
+spec = PodSpec(environment="gcp-starter")
+pc = Pinecone(api_key=os.environ["PINECONE_API_KEY"])
 
 #selecting the pinecone index
-pinecone_index = pinecone_client.Index("portfolio")
+index = pc.Index("portfolio")
+
+#setting the llm and embeddings
+llm = Ollama(model="mixtral:8x7b")
+embeddings = OllamaEmbeddings(model="mixtral:8x7b")
+
+#creating the PineconeVectorStore
+vectorsstore = PineconeVectorStore(
+    index, embeddings
+    )
 
 #dowloading the web contents
-BeautifulSoupWebReader = download_loader("BeautifulSoupWebReader")
+loader = WebBaseLoader("https://portfolio.danielgmason.com")
+docs = loader.load()
+documents = RecursiveCharacterTextSplitter(
+    chunk_size=1000, chunk_overlap=200
+).split_documents(docs)
 
-loader = BeautifulSoupWebReader()
-documents = loader.load_data(urls=[DATA_URL])
+#using the chunks of documents to create the index
+index = VectorStoreIndex.from_documents(documents)
 
-# Define which embedding model to use "models/embedding-001"
-embed_model = GeminiEmbedding(model_name="models/embedding-001")
+#making the prompts
+template = """
+Answer the question based on the context below. If you can't  answer the question, reply "This is a tricky one. I don't have an answer. Will you ask the question in another way."
 
-Settings.llm = llm
-Settings.embed_model = embed_model
-Settings.chunk_size = 768
+Context: {context}
 
-# Create a PineconeVectorStore using the specified pinecone_index
-vector_store = PineconeVectorStore(pinecone_index=pinecone_index)
+Question: {question}
+"""
+prompt = PromptTemplate.from_template(template)
 
-# Create a StorageContext using the created PineconeVectorStore
-storage_context = StorageContext.from_defaults(
-    vector_store=vector_store
+# putting the chain together
+retriever = vectorstore.as_retriever()
+chain = (
+    {
+        "context": retriever,
+        "question": RunnablePassthrough()
+    }
+    | prompt
+    | llm
+    | StrOutputParser
 )
-
-# Use the chunks of documents and the storage_context to create the index
-index = VectorStoreIndex.from_documents(
-    documents, 
-    storage_context=storage_context
-)
-
-#query Pinecone vector store
-query_engine = index.as_query_engine()
 
 #UI
+import streamlit as st
+
+st.title("UX for AI bot")
+
+#initialize chat istory
 if "history" not in st.session_state:
     st.session_state.history = []
+
+#display message history
 for msg in st.session_state.history:
     with st.chat_message(msg['role']):
         st.markdown(msg['content'])
 
+#react to user input
+query = st.chat_input("Say something")
+if query:
+    #display user message in chat container
+    with st.chat_message("user"):
+        st.markdown(query)
 
-prompt = st.chat_input("Say something")
-if prompt:
+    #add user message to chat history
     st.session_state.history.append({
         'role':'user',
-        'content':prompt
+        'content':query
     })
 
-    with st.chat_message("user"):
-        st.markdown(prompt)
-    
-    # Query the index, send the context to Gemini, and wait for the response
     with st.spinner('💡Thinking'):
-        response = query_engine.query(prompt)
+        # Query the index
+        response = chain.invoke(query)
 
         st.session_state.history.append({
             'role':'Assistant',
             'content':response
         })
 
-        #print the response
-        with st.chat_message("Assistant"):
-            st.markdown(response)
+    #print the response
+    with st.chat_message("Assistant"):
+        st.markdown(response)
