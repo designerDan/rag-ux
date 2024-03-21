@@ -13,6 +13,8 @@ from langchain.prompts import PromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 
+import streamlit as st
+
 load_dotenv()
 
 #setting API keys
@@ -68,8 +70,6 @@ chain = (
 )
 
 #UI
-import streamlit as st
-
 st.title("UX for AI bot")
 
 #initialize chat istory
