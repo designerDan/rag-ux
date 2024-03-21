@@ -8,11 +8,8 @@ llama-index-core
 BeautifulSoup4
 google-generativeai
 
+langchain
 langchain_pinecone
-langchain_community.llms
-langchain_community.embeddings
-langchain_community.document_loaders
+langchain_community
 langchain_text_splitters
-langchain.prompts
-langchain_core.runnables
-langchain_core.output_parsers
+langchain_core
