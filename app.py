@@ -23,31 +23,31 @@ embeddings = OllamaEmbeddings(model="mixtral:8x7b")
 from pinecone import Pinecone, ServerlessSpec, PodSpec
 import time
 
-spec = PodSpec(environment="gcp-starter")
 pc = Pinecone(api_key=os.environ["PINECONE_API_KEY"])
 
 # configure client
-if use_serverless:  
+use_serverless = False
+if use_serverless:
     spec = ServerlessSpec(cloud='aws', region='us-west-2')
-else:  
-    # if not using a starter index, you should specify a pod_type too  
-    spec = PodSpec()
+else:
+    # if not using a starter index, you should specify a pod_type too
+    spec = PodSpec(environment="gcp-starter")
 
-# check for and delete index if already exists  
-index_name = 'ux-for-ai'  
-if index_name in pc.list_indexes().names():  
-    pc.delete_index(index_name)  
+# check for and delete index if already exists
+index_name = 'ux-for-ai'
+if index_name in pc.list_indexes().names():
+    pc.delete_index(index_name)
 
-# create a new index  
-pc.create_index(  
-    index_name,  
-    dimension=1536,  # dimensionality of text-embedding-ada-002  
-    metric='dotproduct',  
-    spec=spec  
+# create a new index
+pc.create_index(
+    index_name,
+    dimension=768,
+    metric='dotproduct',
+    spec=spec
 )
 
-# wait for index to be initialized  
-while not pc.describe_index(index_name).status['ready']:  
+# wait for index to be initialized
+while not pc.describe_index(index_name).status['ready']:
     time.sleep(1)
 
 pc_index = pc.Index(index_name)
@@ -66,9 +66,7 @@ docs = text_splitter.split_documents(documents)
 #adding the embeddings to the vector store
 from langchain_pinecone import PineconeVectorStore
 
-vectorstore = PineconeVectorStore(pc_index=pc_index, embeddings=embeddings)
-
-index = vectorstore.from_documents(docs)
+vectorstore = PineconeVectorStore.from_documents(docs, embeddings, index_name='ux-for-ai')
 
 #making the prompts
 from langchain.prompts import PromptTemplate
@@ -86,7 +84,7 @@ prompt = PromptTemplate.from_template(template)
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 
-retriever = index.as_retriever()
+retriever = vectorstore.as_retriever()
 chain = (
     {
         "context": retriever,
