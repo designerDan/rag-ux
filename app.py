@@ -9,91 +9,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 #setting API keys
+
 os.environ["GOOGLE_API_KEY"] = st.secrets.GOOGLE_API_KEY
 os.environ["PINECONE_API_KEY"] = st.secrets.PINECONE_API_KEY
-
-#setting the llm and embeddings
-from langchain_community.llms import Ollama
-from langchain_community.embeddings import OllamaEmbeddings
-
-llm = Ollama(model="mixtral:8x7b")
-embeddings = OllamaEmbeddings(model="mixtral:8x7b")
-
-#initializing Pinecone
-from pinecone import Pinecone, ServerlessSpec, PodSpec
-import time
-
-pc = Pinecone(api_key=os.environ["PINECONE_API_KEY"])
-
-# configure client
-use_serverless = False
-if use_serverless:
-    spec = ServerlessSpec(cloud='aws', region='us-west-2')
-else:
-    # if not using a starter index, you should specify a pod_type too
-    spec = PodSpec(environment="gcp-starter")
-
-# check for and delete index if already exists
-index_name = 'ux-for-ai'
-if index_name in pc.list_indexes().names():
-    pc.delete_index(index_name)
-
-# create a new index
-pc.create_index(
-    index_name,
-    dimension=768,
-    metric='dotproduct',
-    spec=spec
-)
-
-# wait for index to be initialized
-while not pc.describe_index(index_name).status['ready']:
-    time.sleep(1)
-
-pc_index = pc.Index(index_name)
-
-#generating the embeddings
-from langchain_community.document_loaders import TextLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-
-loader = TextLoader("./data/data.txt")
-documents = loader.load()
-text_splitter = RecursiveCharacterTextSplitter(
-    chunk_size=512, chunk_overlap=200
-)
-docs = text_splitter.split_documents(documents)
-
-#adding the embeddings to the vector store
-from langchain_pinecone import PineconeVectorStore
-
-vectorstore = PineconeVectorStore.from_documents(docs, embeddings, index_name='ux-for-ai')
-
-#making the prompts
-from langchain.prompts import PromptTemplate
-
-template = """
-Answer the question based on the context below. If you can't  answer the question, reply "This is a tricky one. I don't have an answer. Will you ask the question in another way."
-
-Context: {context}
-
-Question: {question}
-"""
-prompt = PromptTemplate.from_template(template)
-
-# putting the chain together
-from langchain_core.runnables import RunnablePassthrough
-from langchain_core.output_parsers import StrOutputParser
-
-retriever = vectorstore.as_retriever()
-chain = (
-    {
-        "context": retriever,
-        "question": RunnablePassthrough()
-    }
-    | prompt
-    | llm
-    | StrOutputParser
-)
 
 #UI
 st.title("UX for AI bot")
@@ -106,6 +24,48 @@ if "history" not in st.session_state:
 for msg in st.session_state.history:
     with st.chat_message(msg['role']):
         st.markdown(msg['content'])
+
+#setting the llm and embeddings
+from llama_index.llms.gemini import Gemini
+from llama_index.embeddings.gemini import GeminiEmbedding
+from llama_index.core import Settings
+
+llm = Gemini()
+embed_model = GeminiEmbedding(model_name="models/embedding-001")
+
+Settings.llm = llm
+Settings.embed_model = embed_model
+Settings.chunk_size = 768
+
+#initializing Pinecone
+from pinecone import Pinecone
+
+pinecone = Pinecone(api_key=os.environ["PINECONE_API_KEY"])
+
+index_name = 'ux-for-ai'
+pinecone_index = pinecone.Index(index_name)
+
+#generating the embeddings
+from llama_index.core import SimpleDirectoryReader
+
+loader = SimpleDirectoryReader(input_dir="./data")
+docs = loader.load_data()
+
+#adding the embeddings to the vector store
+from llama_index.vector_stores.pinecone import PineconeVectorStore
+from llama_index.core import (
+    StorageContext,
+    VectorStoreIndex
+)
+
+vector_store = PineconeVectorStore(pinecone_index=pinecone_index)
+storage_context = StorageContext.from_defaults(vector_store=vector_store)
+index = VectorStoreIndex.from_documents(
+    docs, 
+    storage_context=storage_context
+)
+
+query_engine = index.as_query_engine()
 
 #react to user input
 query = st.chat_input("Say something")
@@ -122,7 +82,7 @@ if query:
 
     with st.spinner('💡Thinking'):
         # Query the index
-        response = chain.invoke(query)
+        response = query_engine.query(query)
 
         st.session_state.history.append({
             'role':'Assistant',
