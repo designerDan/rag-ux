@@ -17,7 +17,7 @@ from llama_index.core import Settings
 from llama_index.llms.gemini import Gemini
 from llama_index.embeddings.gemini import GeminiEmbedding
 
-llm = Gemini(temperature=0, api_key=GOOGLE_API_KEY)
+llm = Gemini(temperature=0.7, api_key=GOOGLE_API_KEY)
 embed_model = GeminiEmbedding(model_name="models/embedding-001")
 
 Settings.llm = llm
@@ -144,6 +144,8 @@ vector_index = VectorStoreIndex(nodes=nodes,vector_store=vector_store, storage_c
 retriever = VectorIndexRetriever(index=vector_index, similarity_top_k=5)
 
 query_engine = RetrieverQueryEngine(retriever=retriever)
+
+#evaluate the data
 
 #UI
 query = st.chat_input("Say something")
