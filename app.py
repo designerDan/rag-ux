@@ -11,6 +11,7 @@ load_dotenv()
 #setting API keys
 GOOGLE_API_KEY = st.secrets.GOOGLE_API_KEY
 PINECONE_API_KEY = st.secrets.PINECONE_API_KEY
+
 os.environ["GOOGLE_API_KEY"] = GOOGLE_API_KEY
 os.environ["PINECONE_API_KEY"] = PINECONE_API_KEY
 
@@ -129,8 +130,6 @@ pipeline = IngestionPipeline(
         vector_store=vector_store
     )
 
-# fill the vector store with data
-pipeline.run(document=cleaned_docs)
 nodes = pipeline.run(document=cleaned_docs)
 
 pinecone_index.describe_index_stats()
