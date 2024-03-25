@@ -9,8 +9,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 #setting API keys
-os.environ["GOOGLE_API_KEY"] = st.secrets.GOOGLE_API_KEY
-os.environ["PINECONE_API_KEY"] = st.secrets.PINECONE_API_KEY
+GOOGLE_API_KEY = st.secrets.GOOGLE_API_KEY
+PINECONE_API_KEY = st.secrets.PINECONE_API_KEY
+os.environ["GOOGLE_API_KEY"] = GOOGLE_API_KEY
+os.environ["PINECONE_API_KEY"] = PINECONE_API_KEY
 
 #setting llama_index defaults
 from llama_index.core import Settings
