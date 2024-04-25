@@ -201,8 +201,8 @@ def save_query(query):
 #UI
 st.sidebar.markdown("""If you find this bot devoid of value then send me a note indicating what you hoped it would do and how you would make it better.
 If you find this bot useful then send me a note detailing what value you got out of it.
-[Give feedback](https://forms.gle/vjkzpaa91jkpPQbT9)
-This AI is built off the free tiers of Gemini and Streamlit. It is not likely though still possible that your usage will hit the upper limit of those tiers. If the software keeps throwing errors then that may be the cause. Try refreshing the browser, clearing your cache, and relaunching the site. If that doesn't work then send me a message with a screenshot via the provided feedback form.""")
+\n[Give feedback](https://forms.gle/vjkzpaa91jkpPQbT9)
+\nThis AI is built off the free tiers of Gemini and Streamlit. It is not likely though still possible that your usage will hit the upper limit of those tiers. If the software keeps throwing errors then that may be the cause. Try refreshing the browser, clearing your cache, and relaunching the site. If that doesn't work then send me a message with a screenshot via the provided feedback form.""")
 query = st.chat_input("Say something")
 if query:
     #save query
