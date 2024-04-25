@@ -7,6 +7,4 @@ llama_index-llms-gemini
 llama-index-embeddings-gemini
 llama-index-vector-stores-pinecone
 
-trulens-eval
-
 google-generativeai

@@ -32,9 +32,9 @@ Settings.context_window = 3900
 #HeaderUI
 st.title("UX for AI RAG Experiment")
 st.markdown("""This bot is not about which AI tools you can use as a UX designer or how to use AI to design software. I don't care about Figma's latest AI widget or what UIzard is doing with their software.
-This bot is for thought leadership on the emerging challenges, principles, heuristics, and foundations for designing AI-driven user experiences.
-For a list of sources powering this experiment visit the Readme on Github.
-[View sources](https://github.com/designerDan/rag-ux)""")
+\nThis bot is for thought leadership on the emerging challenges, principles, heuristics, and foundations for designing AI-driven user experiences.
+\nFor a list of sources powering this experiment visit the Readme on Github.
+\n[View sources](https://github.com/designerDan/rag-ux)""")
 
 #initialize chat istory
 if "history" not in st.session_state:
@@ -168,8 +168,7 @@ response_synthesizer=get_response_synthesizer(
 
 query_engine = RetrieverQueryEngine(
     retriever=retriever,
-    response_synthesizer=response_synthesizer,
-    streaming=True)
+    response_synthesizer=response_synthesizer)
 
 #updating
 qa_prompt_tmpl_str = (
