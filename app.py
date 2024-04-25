@@ -2,6 +2,7 @@ import os
 
 #app wrapper
 import streamlit as st
+from datetime import datetime
 
 #not sure but maybe a best practice? i dunno what this does
 from dotenv import load_dotenv
@@ -28,8 +29,12 @@ Settings.embed_model = embed_model
 Settings.num_output = 768
 Settings.context_window = 3900
 
-#UI
-st.title("UX for AI bot")
+#HeaderUI
+st.title("UX for AI RAG Experiment")
+st.markdown("""This bot is not about which AI tools you can use as a UX designer or how to use AI to design software. I don't care about Figma's latest AI widget or what UIzard is doing with their software.
+This bot is for thought leadership on the emerging challenges, principles, heuristics, and foundations for designing AI-driven user experiences.
+For a list of sources powering this experiment visit the Readme on Github.
+[View sources](https://github.com/designerDan/rag-ux)""")
 
 #initialize chat istory
 if "history" not in st.session_state:
@@ -130,27 +135,79 @@ pipeline = IngestionPipeline(
         vector_store=vector_store
     )
 
+pipeline.persist("./pipeline_storage")
+pipeline.load("./pipeline_storage")
+
 nodes = pipeline.run(document=cleaned_docs)
 
 pinecone_index.describe_index_stats()
 
 #query the data
-from llama_index.core import StorageContext, VectorStoreIndex
+from llama_index.core import StorageContext, VectorStoreIndex, PromptTemplate, get_response_synthesizer
 from llama_index.core.retrievers import VectorIndexRetriever
 from llama_index.core.query_engine import RetrieverQueryEngine
 
 storage_context = StorageContext.from_defaults(vector_store=vector_store)
-vector_index = VectorStoreIndex(nodes=nodes,vector_store=vector_store, storage_context=storage_context)
+vector_index = VectorStoreIndex(
+    nodes=nodes,
+    vector_store=vector_store,
+    storage_context=storage_context
+)
 
-retriever = VectorIndexRetriever(index=vector_index, similarity_top_k=5)
+retriever = VectorIndexRetriever(
+    index=vector_index,
+    similarity_top_k=5
+)
 
-query_engine = RetrieverQueryEngine(retriever=retriever)
+response_synthesizer=get_response_synthesizer(
+    response_mode="tree_summarize",
+    llm=llm,
+    verbose=True,
+    structured_answer_filtering=True,
+)
+
+query_engine = RetrieverQueryEngine(
+    retriever=retriever,
+    response_synthesizer=response_synthesizer,
+    streaming=True)
+
+#updating
+qa_prompt_tmpl_str = (
+    "Context information is below.\n"
+    "---------------------\n"
+    "{context_str}\n"
+    "---------------------\n"
+    "Given the context information and not prior knowledge, "
+    "answer the query using language that meets a Flesch-Kincaid score of 70 or greater.\n"
+    "Query: {query_str}\n"
+    "Answer: "
+)
+qa_prompt_tmpl = PromptTemplate(qa_prompt_tmpl_str)
+ 
+query_engine.update_prompts(
+    {"response_synthesizer:text_qa_template": qa_prompt_tmpl}
+)
 
 #evaluate the data
 
+# Creating a file to store user queries
+queries_file = "user_queries.txt"
+
+# Function to save the query to the file
+def save_query(query):
+    with open(queries_file, "a") as f:
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        f.write(f"{timestamp}: {query}\n")
+
 #UI
+st.sidebar.markdown("""If you find this bot devoid of value then send me a note indicating what you hoped it would do and how you would make it better.
+If you find this bot useful then send me a note detailing what value you got out of it.
+[Give feedback](https://forms.gle/vjkzpaa91jkpPQbT9)
+This AI is built off the free tiers of Gemini and Streamlit. It is not likely though still possible that your usage will hit the upper limit of those tiers. If the software keeps throwing errors then that may be the cause. Try refreshing the browser, clearing your cache, and relaunching the site. If that doesn't work then send me a message with a screenshot via the provided feedback form.""")
 query = st.chat_input("Say something")
 if query:
+    #save query
+    save_query(query)
     #display user message in chat container
     with st.chat_message("user"):
         st.markdown(query)
