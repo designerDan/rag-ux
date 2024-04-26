@@ -202,10 +202,6 @@ def save_query(query):
 
 #UI
 query = st.chat_input("What do you want to know?")
-if st.button("What are the current challenges designers face when creating experiences for AI?"):
-    query = "What are the current challenges designers face when creating experiences for AI?"
-    st.session_state.chat_input = query
-    st.experimental_rerun()
 
 if query:
     #save query
@@ -233,3 +229,7 @@ if query:
     #print the response
     with st.chat_message("Assistant"):
         st.markdown(response)
+
+if st.button("What are the challenges designers face when creating experiences for AI?"):
+    st.chat_input = "What are the challenges designers face when creating experiences for AI?"
+    st.experimental_rerun()
