@@ -168,8 +168,7 @@ response_synthesizer=get_response_synthesizer(
 
 query_engine = RetrieverQueryEngine(
     retriever=retriever,
-    response_synthesizer=response_synthesizer,
-    streaming=True)
+    response_synthesizer=response_synthesizer)
 
 #updating
 qa_prompt_tmpl_str = (
