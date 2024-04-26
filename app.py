@@ -191,10 +191,8 @@ query_engine.update_prompts(
     {"response_synthesizer:text_qa_template": qa_prompt_tmpl}
 )
 
-#evaluate the data
-
 # Creating a file to store user queries
-queries_file = "user_queries.txt"
+queries_file = "./user_queries.txt"
 
 # Function to save the query to the file
 def save_query(query):
@@ -203,11 +201,11 @@ def save_query(query):
         f.write(f"{timestamp}: {query}\n")
 
 #UI
-tom = st.chat_input("What")
-
+query = st.chat_input("Say something")
 if query:
     #save query
     save_query(query)
+    
     #display user message in chat container
     with st.chat_message("user"):
         st.markdown(query)
