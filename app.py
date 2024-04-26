@@ -201,11 +201,11 @@ def save_query(query):
         f.write(f"{timestamp}: {query}\n")
 
 #UI
-query = st.chat_input("Say something")
+#query = st.chat_input("Say something")
 if query:
     #save query
     save_query(query)
-    
+
     #display user message in chat container
     with st.chat_message("user"):
         st.markdown(query)
