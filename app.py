@@ -200,3 +200,4 @@ def save_query(query):
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         f.write(f"{timestamp}: {query}\n")
 
+query = st.chat_input("What would you like to know?")
