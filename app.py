@@ -279,8 +279,8 @@ if st.button("Tell me ways to establish user trust in AI."):
     with st.chat_message("Assistant"):
         st.markdown(response)
 
-if st.button("what are good principles to follow when designing experiences for AI?"):
-    query = "what are good principles to follow when designing experiences for AI?"
+if st.button("What are good principles to follow when designing experiences for AI?"):
+    query = "What are good principles to follow when designing experiences for AI?"
     
     #display user message in chat container
     with st.chat_message("user"):
