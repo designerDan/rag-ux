@@ -36,7 +36,7 @@ st.markdown("""This bot is not about which AI tools you can use as a UX designer
 st.sidebar.markdown("""If you find this bot devoid of value then send me a note indicating what you hoped it would do and how you would make it better.
 If you find this bot useful then send me a note detailing what value you got out of it.
 \n[Give feedback](https://forms.gle/vjkzpaa91jkpPQbT9)
-\nThis AI is built off the free tiers of Gemini and Streamlit. It is not likely though still possible that your usage will hit the upper limit of those tiers. If the software keeps throwing errors then that may be the cause. Try refreshing the browser, clearing your cache, and relaunching the site. If that doesn't work then send me a message with a screenshot via the provided feedback form.
+\nThis AI is built off the free tiers of Gemini and Streamlit. It is not likely though still possible that your usage will hit the upper limit of those tiers. If the software keeps throwing errors then that may be the cause. Try refreshing the browser, clearing your cache, and/or relaunching the site. If that doesn't work then send me a message via the provided feedback link.
 \nFor a list of sources powering this experiment visit the Readme on Github.
 \n[View sources](https://github.com/designerDan/rag-ux)""")
 
@@ -229,7 +229,3 @@ if query:
     #print the response
     with st.chat_message("Assistant"):
         st.markdown(response)
-
-if st.button("What are the challenges designers face when creating experiences for AI?"):
-    st.chat_input = "What are the challenges designers face when creating experiences for AI?"
-    st.experimental_rerun()
