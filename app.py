@@ -203,7 +203,8 @@ def save_query(query):
         f.write(f"{timestamp}: {query}\n")
 
 #UI
-query = st.chat_input("Say something")
+tom = st.chat_input("What")
+
 if query:
     #save query
     save_query(query)
