@@ -202,10 +202,37 @@ def save_query(query):
 
 #UI
 query = st.chat_input("What would you like to know?")
+
 if query:
     #save query
     save_query(query)
 
+    #display user message in chat container
+    with st.chat_message("user"):
+        st.markdown(query)
+
+    #add user message to chat history
+    st.session_state.history.append({
+        'role':'user',
+        'content':query
+    })
+
+    with st.spinner('💡Thinking'):
+        # Query the db
+        response = query_engine.query(query)
+
+        st.session_state.history.append({
+            'role':'Assistant',
+            'content':response
+        })
+
+    #print the response
+    with st.chat_message("Assistant"):
+        st.markdown(response)
+
+if st.button("What are some challenges designers face when designing experiences for AI?"):
+    query = "What are some challenges designers face when designing experiences for AI?"
+    
     #display user message in chat container
     with st.chat_message("user"):
         st.markdown(query)
