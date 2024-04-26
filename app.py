@@ -32,10 +32,13 @@ Settings.context_window = 3900
 #HeaderUI
 st.title("UX for AI RAG Experiment")
 st.markdown("""This bot is not about which AI tools you can use as a UX designer or how to use AI to design software. I don't care about Figma's latest AI widget or what UIzard is doing with their software.
-\nThis bot is for thought leadership on the emerging challenges, principles, heuristics, and foundations for designing AI-driven user experiences.
+\nThis bot is for thought leadership on the emerging challenges, principles, heuristics, and foundations for designing AI-driven user experiences.""")
+st.sidebar.markdown("""If you find this bot devoid of value then send me a note indicating what you hoped it would do and how you would make it better.
+If you find this bot useful then send me a note detailing what value you got out of it.
+\n[Give feedback](https://forms.gle/vjkzpaa91jkpPQbT9)
+\nThis AI is built off the free tiers of Gemini and Streamlit. It is not likely though still possible that your usage will hit the upper limit of those tiers. If the software keeps throwing errors then that may be the cause. Try refreshing the browser, clearing your cache, and relaunching the site. If that doesn't work then send me a message via the provided feedback form.
 \nFor a list of sources powering this experiment visit the Readme on Github.
 \n[View sources](https://github.com/designerDan/rag-ux)""")
-
 #initialize chat istory
 if "history" not in st.session_state:
     st.session_state.history = []
@@ -199,11 +202,7 @@ def save_query(query):
         f.write(f"{timestamp}: {query}\n")
 
 #UI
-st.sidebar.markdown("""If you find this bot devoid of value then send me a note indicating what you hoped it would do and how you would make it better.
-If you find this bot useful then send me a note detailing what value you got out of it.
-\n[Give feedback](https://forms.gle/vjkzpaa91jkpPQbT9)
-\nThis AI is built off the free tiers of Gemini and Streamlit. It is not likely though still possible that your usage will hit the upper limit of those tiers. If the software keeps throwing errors then that may be the cause. Try refreshing the browser, clearing your cache, and relaunching the site. If that doesn't work then send me a message with a screenshot via the provided feedback form.""")
-query = st.chat_input("Say something")
+query = st.chat_input("What do you want to know?")
 if query:
     #save query
     save_query(query)
