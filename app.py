@@ -255,3 +255,55 @@ if st.button("What are some challenges designers face when designing experiences
     #print the response
     with st.chat_message("Assistant"):
         st.markdown(response)
+
+if st.button("What are some heuristics designers need to consider when designing experiences for AI?"):
+    query = "What are some heuristics designers need to consider when designing experiences for AI?"
+    
+    #display user message in chat container
+    with st.chat_message("user"):
+        st.markdown(query)
+
+    #add user message to chat history
+    st.session_state.history.append({
+        'role':'user',
+        'content':query
+    })
+
+    with st.spinner('💡Thinking'):
+        # Query the db
+        response = query_engine.query(query)
+
+        st.session_state.history.append({
+            'role':'Assistant',
+            'content':response
+        })
+
+    #print the response
+    with st.chat_message("Assistant"):
+        st.markdown(response)
+
+if st.button("Tell me ways to establish user trust in AI."):
+    query = "Tell me ways to establish user trust in AI."
+    
+    #display user message in chat container
+    with st.chat_message("user"):
+        st.markdown(query)
+
+    #add user message to chat history
+    st.session_state.history.append({
+        'role':'user',
+        'content':query
+    })
+
+    with st.spinner('💡Thinking'):
+        # Query the db
+        response = query_engine.query(query)
+
+        st.session_state.history.append({
+            'role':'Assistant',
+            'content':response
+        })
+
+    #print the response
+    with st.chat_message("Assistant"):
+        st.markdown(response)
